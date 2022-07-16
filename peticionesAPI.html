@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        background-color: #333;
+        color: #ff9;
+        width: 75ch;
+        margin: auto;
+      }
+    </style>
+    <title>Peticiones a API</title>
+  </head>
+  <body>
+    <h1>Las tres maneras de hacer peticiones a API</h1>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      const HTMLResponse = document.getElementById("root");
+      const API_URL = "https://jsonplaceholder.typicode.com";
+
+      // -->XMLHTTPREQUEST
+      const xhr = new XMLHttpRequest();
+
+      function onRecuestHandler() {
+        if (this.status === 200 && this.readyState === 4) {
+          // 0 =  UNSET, no se ha llamado al metodo open
+          // 1 = OPENED, se ha llamado al metodo open.
+          // 2 = HEADERS_RECEIVED, se esta llamando al metodo send()
+          // 3 = LOADING, esta cargando, es decir, esta recibiendo la respuesta.
+          // 4 = DONE, se ha completado la operacion.
+
+          const data = JSON.parse(this.response);
+          console.log(data);
+          const tpl = data.map(
+            (user) => `<li>${user.name} 📧${user.email} </li>`
+          );
+          HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;
+        }
+      }
+
+      xhr.addEventListener("load", onRecuestHandler);
+      xhr.open("GET", `${API_URL}/users`);
+      xhr.send();
+
+      // -->AXIOS
+      axios
+        .get(`${API_URL}/users`)
+        .then((res) => {
+          const tpl = res.data.map(
+            (user) => `<li>${user.name} 📧${user.email}</li>`
+          );
+          HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;
+        })
+        .catch((err) => console.log(err))
+        .finally(() =>
+          console.log("esto se ejecutara sea cual sea la respuesta de axios")
+        );
+
+      // --> FETCH
+      const ul = document.createElement("UL");
+
+      fetch(`${API_URL}/users`)
+        .then((res) => res.json())
+        .then((res) => {
+          res.forEach((user) => {
+            let elem = document.createElement("LI");
+            elem.appendChild(
+              document.createTextNode(`${user.name} 📧${user.email}`)
+            );
+            ul.appendChild(elem);
+          });
+
+          HTMLResponse.appendChild(ul);
+          // const data = res.map((user) => `<li> ☑️${user.name} 📧${user.email}</li>`);
+          // HTMLResponse.innerHTML = ` <ul>${data}</ul>`;
+        })
+        .catch((err) => console.log(err));
+    </script>
+  </body>
+</html>
